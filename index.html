@@ -94,11 +94,20 @@ nav .links a:hover,nav .links a.on{color:var(--ac);border-color:var(--ac)}
 @media(min-width:720px){.prev{grid-template-columns:repeat(4,1fr);gap:16px}}
 .prev img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
 .org{display:flex;flex-direction:column;align-items:center}
-.node{background:var(--solid);border:1px solid var(--line);border-radius:8px;padding:8px 16px;text-align:center;font-size:.9rem}
+.node{background:var(--solid);border:1px solid var(--line);border-radius:8px;padding:8px 10px;text-align:center;font-size:.85rem;line-height:1.35;position:relative;z-index:1}
 .node small{display:block;color:var(--mut);font:.75rem var(--mono)}
 .node.top{border-color:var(--ac)}
-.lv{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-.trunk{height:20px;width:2px;background:linear-gradient(var(--ac),var(--line))}
+.lv{list-style:none;padding:0;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:flex-start}
+.ch{position:relative;display:flex;flex-direction:column;align-items:center}
+.ch>.node{min-width:124px}
+.trunk{height:18px;width:2px;background:linear-gradient(var(--ac),var(--ac2));opacity:.6}
+@media(min-width:1060px){
+ .lv{flex-wrap:nowrap;gap:0}
+ .ch{padding:18px 4px 0}
+ .ch::before{content:"";position:absolute;top:0;left:50%;width:2px;height:18px;margin-left:-1px;background:var(--ac2);opacity:.6}
+ .ch::after{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--ac2);opacity:.6}
+ .ch:first-child::after{left:50%}.ch:last-child::after{right:50%}.ch:only-child::after{display:none}
+}
 footer{border-top:1px solid var(--line);padding:30px 0;background:var(--card);margin-top:30px}
 footer .wrap{display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;align-items:center}
 footer .so{display:flex;gap:14px;flex-wrap:wrap}
@@ -130,14 +139,11 @@ footer .so{display:flex;gap:14px;flex-wrap:wrap}
 .rise{opacity:0;transform:translateY(18px)}
 body.go .rise{animation:rise .7s cubic-bezier(.2,.7,.2,1) both;animation-delay:var(--d,0s)}
 @keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
-.kg{display:flex;flex-direction:column;align-items:center}
-.kg .trunk{height:14px}
 #qt{width:100%;background:var(--bg);border:1px solid var(--ac);border-radius:6px;color:var(--tx);padding:8px;font:.9rem var(--sans);resize:vertical}
-.term{background:#04080c;border:1px solid var(--ac);border-radius:10px;overflow:hidden}
-.tbar{display:flex;gap:6px;align-items:center;padding:8px 12px;background:#0b141c;border-bottom:1px solid #1b2a39}
-.tbar i{width:10px;height:10px;border-radius:50%;background:#ff5f57}.tbar i:nth-child(2){background:#febc2e}.tbar i:nth-child(3){background:#28c840}
-.tbar span{margin-left:8px;color:#7e92a6;font:.78rem var(--mono)}
-#tout{margin:0;padding:14px 16px;height:340px;overflow:auto;font:.82rem/1.65 var(--mono);white-space:pre;color:#00ff9c}
+.topo{position:relative;border:1px solid var(--ac);border-radius:12px;background:var(--card);overflow:hidden;height:clamp(520px,52vw,680px)}
+.topo canvas{display:block;width:100%;height:100%}
+.tip{position:absolute;pointer-events:none;background:var(--solid);color:var(--tx);border:1px solid var(--ac);border-radius:6px;padding:4px 10px;font:.78rem var(--mono);white-space:nowrap;transform:translateX(-50%);z-index:2}
+.card .mt{font-size:.78rem;font-style:italic;margin-top:6px;opacity:.9;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}.rise{opacity:1!important;transform:none!important}}
 </style>
 </head>
@@ -147,7 +153,7 @@ body.go .rise{animation:rise .7s cubic-bezier(.2,.7,.2,1) both;animation-delay:v
 <nav><div class="wrap">
   <b>TKJ.net</b>
   <div class="links">
-    <a href="#beranda">Beranda</a><a href="#wali">Wali Kelas</a><a href="#siswa">Anggota</a><a href="#struktur">Struktur</a><a href="#galeri">Galeri</a><a href="#kontak">Kontak</a>
+    <a href="#beranda">Beranda</a><a href="#wali">Wali Kelas</a><a href="#siswa">Anggota</a><a href="#struktur">Struktur</a><a href="#topologi">Topologi</a><a href="#galeri">Galeri</a><a href="#kontak">Kontak</a>
   </div>
   <button class="btn" id="tema" aria-label="Ganti mode terang atau gelap">Mode</button>
   <button class="btn" id="mn" aria-label="Menu">Menu</button>
@@ -203,8 +209,14 @@ body.go .rise{animation:rise .7s cubic-bezier(.2,.7,.2,1) both;animation-delay:v
   <div class="org">
     <div class="node top">Wali kelas<small>server utama</small></div><div class="trunk"></div>
     <div class="node">Ketua kelas<small id="oK"></small></div><div class="trunk"></div>
-    <div class="lv" id="orgLv"></div>
+    <ul class="lv" id="orgLv"></ul>
   </div>
+</div></section>
+
+<section id="topologi"><div class="wrap">
+  <h2>Topologi jaringan kelas</h2>
+  <p class="sub">1 wali kelas sebagai server utama dan 38 siswa sebagai node. Arahkan kursor ke node untuk melihat nama, klik atau ketuk untuk melihat foto dan moto.</p>
+  <div class="topo" id="topo"><canvas id="tc" role="img" aria-label="Topologi jaringan: wali kelas di tengah terhubung ke 38 siswa. Daftar lengkap siswa ada di bagian Anggota kelas."></canvas><div class="tip" id="tip" hidden></div></div>
 </div></section>
 
 <section id="cuplikan"><div class="wrap">
@@ -227,12 +239,6 @@ body.go .rise{animation:rise .7s cubic-bezier(.2,.7,.2,1) both;animation-delay:v
 </main>
 </div>
 
-<section id="terminal" style="padding-top:20px"><div class="wrap">
-  <h2>Terminal kelas</h2>
-  <p class="sub">Daftar wali kelas, siswa, dan jabatan diketik otomatis.</p>
-  <div class="term"><div class="tbar"><i></i><i></i><i></i><span>tkj@kelas:~</span></div><pre id="tout"></pre></div>
-</div></section>
-
 <footer id="kontak"><div class="wrap">
   <div><b class="mono" style="color:var(--ac)">TKJ.net</b><br><span style="color:var(--mut)" id="foot"></span></div>
   <div class="so">
@@ -243,7 +249,7 @@ body.go .rise{animation:rise .7s cubic-bezier(.2,.7,.2,1) both;animation-delay:v
 </div></footer>
 
 <div id="lb" role="dialog" aria-modal="true" aria-label="Pratinjau foto">
-  <div class="lbp"><img id="lbi" alt=""><div class="lbt"><h3 id="lbt"></h3><p id="lbs"></p><blockquote id="lbq"></blockquote><div id="qe" hidden><textarea id="qt" maxlength="200" rows="3" aria-label="Moto foto"></textarea><div class="row" style="margin:0;padding-top:8px"><button class="btn" id="qs">Simpan moto</button><button class="btn" id="qc">Batal</button></div></div><p id="lbn"></p>
+  <div class="lbp"><img id="lbi" alt=""><div class="lbt"><h3 id="lbt"></h3><p id="lbs"></p><blockquote id="lbq"></blockquote><p class="hint" id="qst" role="status" hidden></p><div id="qe" hidden><textarea id="qt" maxlength="200" rows="3" aria-label="Moto foto"></textarea><p class="hint" id="qh"></p><div class="row" style="margin:0;padding-top:8px"><button class="btn" id="qs">Simpan moto</button><button class="btn" id="qc">Batal</button></div></div><p id="lbn"></p>
   <div class="row"><button class="btn" id="lp">Sebelumnya</button><button class="btn" id="ln">Berikutnya</button><button class="btn" id="lm">Ubah moto</button><label class="btn" id="lu">Ganti foto<input type="file" id="lf" accept="image/*" hidden></label><button class="btn" id="ld">Reset foto</button><button class="btn" id="lx">Tutup</button></div></div></div>
 </div>
 <script>
@@ -299,6 +305,9 @@ const FOTO_SISWA=[
 // Isi 38 nama sesuai nomor absen. Foto: foto/siswa-01.jpg dst. Foto wali: foto/wali-kelas.jpg
 const NAMA=["Robani","Nazira","Krina","Marsha","Dina","Mita","Eka","Aditya","Ajrin","Alip","Aliyah","Anisah","April","Arlyn","Aulia","Azhar","Desti","Devina","Dita","Fahmi","Gias","Intan","Joya","Lukas","Maya","Fachry","Rizal","Naufal","Radik","Radisty","Hanif","Ridha","Afriansyah","Salsa","Raisya","Sopi","Tajry","Yunita"];
 const JABATAN={1:"Ketua kelas",2:"Wakil ketua",3:"Sekretaris",4:"Bendahara1",5:"Bendahara2",6:"Seksi Kebersihan",7:"Seksi Keamanan 1",8:"Seksi Keamanan 2"};
+/* ---- MOTO BERSAMA: supaya moto yang diubah terlihat oleh semua pengunjung ----
+   Isi dengan alamat Firebase Realtime Database (lihat petunjuk). Kalau dikosongkan, moto hanya tersimpan di browser masing-masing. */
+const MOTO_URL=""; // contoh: "https://nama-proyek-default-rtdb.asia-southeast1.firebasedatabase.app"
 const QUOTE={}; // contoh: {1:"Hobi: ngoding. Moto: no bug, no gain."}
 // [nomor, kategori, judul, src foto] — ganti src foto di tiap baris. Kategori: "praktik" atau "lucu"
 // Contoh baris baru: [13,"praktik","Judul foto","foto/praktik-baru.jpg"]
@@ -306,122 +315,3 @@ const GALERI=[
   [1,"Tes Camera","Camera Majapahit","majapahit.jpg"],
   [2,"Dramak","Latihan Drama","latihan.jpg"],
   [5,"lucu","Kabel kusut sebelum praktik","foto/galeri-05.jpg"],
-  [6,"praktik","Pengujian koneksi LAN","foto/galeri-06.jpg"],
-  [9,"lucu","Foto gagal tapi dikenang","foto/galeri-09.jpg"],
-  [10,"praktik","Merakit PC di lab","foto/galeri-10.jpg"],
-  [12,"lucu","Piket yang terlalu santai","foto/galeri-12.jpg"],
-];
-const KAT={semua:"Semua",praktik:"Praktik",lucu:"Momen lucu"};
-/* ======================== */
-const FOTO={},MOTO={};let EXTRA=[];
-const $=s=>document.querySelector(s),pad=n=>String(n).padStart(2,"0"),root=document.documentElement;
-const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
-const ph=(t,w=400,h=w)=>"data:image/svg+xml;utf8,"+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="#10202c"/><g fill="none" stroke="#00ff9c" opacity=".4"><circle cx="${w/2}" cy="${h*.38}" r="${Math.min(w,h)*.14}"/><path d="M${w*.28} ${h*.8}Q${w/2} ${h*.45} ${w*.72} ${h*.8}"/></g><text x="${w/2}" y="${h*.93}" fill="#7e92a6" font-family="monospace" font-size="${Math.max(12,Math.min(w,h)*.055)}" text-anchor="middle">${t}</text></svg>`);
-/* foto gagal dimuat -> placeholder (satu listener untuk semua gambar) */
-document.addEventListener("error",e=>{const i=e.target;if(i.tagName!=="IMG"||i.src.startsWith("data:"))return;i.src=ph(i.dataset.ph||"foto",+i.dataset.w||400,+i.dataset.h||+i.dataset.w||400)},true);
-const img=(src,t,w,h)=>`<img src="${src}" alt="${t}" loading="lazy" data-ph="${t}" data-w="${w||400}" data-h="${h||w||400}">`;
-
-/* tema */
-function warna(){col=getComputedStyle(root).getPropertyValue("--ac").trim()||col}
-function setTema(t){root.dataset.theme=t;$("#tema").textContent=t==="dark"?"Mode terang":"Mode gelap";warna();try{localStorage.setItem("tkj-tema",t)}catch(e){}}
-let saved=null,col="#00ff9c";try{saved=localStorage.getItem("tkj-tema")}catch(e){}
-$("#tema").onclick=()=>setTema(root.dataset.theme==="dark"?"light":"dark");
-$("#mn").onclick=()=>$("nav").classList.toggle("open");
-document.querySelectorAll("nav .links a").forEach(a=>a.addEventListener("click",()=>$("nav").classList.remove("open")));
-document.querySelectorAll("[data-kelas]").forEach(e=>e.textContent=KELAS);
-document.querySelectorAll("[data-thn]").forEach(e=>e.textContent=TAHUN);
-$("#foot").textContent=`Kelas ${KELAS} · Angkatan ${TAHUN}`;
-
-/* lightbox: foto + moto */
-const LB={items:[],i:0,last:null,
- show(items,i){this.items=items;this.last=document.activeElement;this.go(i);$("#lb").classList.add("on");document.body.style.overflow="hidden";$("#lx").focus()},
- go(i){const n=this.items.length;this.i=(i+n)%n;const g=this.items[this.i],im=$("#lbi");
-  im.dataset.ph=g.t;im.dataset.w=900;im.dataset.h=600;im.alt=g.t;im.src=g.src;
-  $("#lbt").textContent=g.t;$("#lbs").textContent=g.s||"";$("#lbq").textContent=g.q||"";$("#lbq").hidden=!g.q;$("#qe").hidden=true;$("#lm").hidden=!g.key;
-  $("#lbn").textContent=n>1?`${this.i+1} / ${n}`:"";$("#lp").hidden=$("#ln").hidden=n<2;$("#lu").hidden=!g.key||!!g.lock;$("#ld").hidden=!g.key||!!g.lock||(!g.custom&&!FOTO[g.key]);$("#ld").textContent=g.custom?"Hapus foto":"Reset foto"},
- hide(){$("#lb").classList.remove("on");document.body.style.overflow="";if(this.last)this.last.focus()}};
-$("#lx").onclick=()=>LB.hide();$("#lp").onclick=()=>LB.go(LB.i-1);$("#ln").onclick=()=>LB.go(LB.i+1);
-$("#lb").onclick=e=>{if(e.target.id==="lb")LB.hide()};
-addEventListener("keydown",e=>{if(!$("#lb").classList.contains("on"))return;if(e.target.tagName==="TEXTAREA"){if(e.key==="Escape")$("#qc").click();return}if(e.key==="Escape")LB.hide();if(e.key==="ArrowLeft")LB.go(LB.i-1);if(e.key==="ArrowRight")LB.go(LB.i+1)});
-
-/* penyimpanan foto sendiri (IndexedDB di browser) */
-const DB={db:null,open(){return new Promise(r=>{try{const q=indexedDB.open("tkj-foto",1);q.onupgradeneeded=()=>q.result.createObjectStore("f");q.onsuccess=()=>{this.db=q.result;r()};q.onerror=q.onblocked=()=>r()}catch(e){r()}})},
- get(){return new Promise(r=>{if(!this.db)return r();try{const q=this.db.transaction("f").objectStore("f").get("d");q.onsuccess=()=>r(q.result);q.onerror=()=>r()}catch(e){r()}})},
- put(){if(!this.db)return;try{const t=this.db.transaction("f","readwrite");t.objectStore("f").put({f:FOTO,x:EXTRA,m:MOTO},"d");t.onerror=()=>alert("Penyimpanan penuh. Hapus beberapa foto lalu coba lagi.")}catch(e){}}};
-const rz=f=>new Promise(r=>{const u=URL.createObjectURL(f),i=new Image();i.onload=()=>{const k=Math.min(1,900/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext("2d").drawImage(i,0,0,c.width,c.height);URL.revokeObjectURL(u);r(c.toDataURL("image/jpeg",.82))};i.onerror=()=>r(null);i.src=u});
-const warn=()=>{if(!DB.db&&!warn.s){warn.s=1;alert("Browser ini tidak bisa menyimpan foto permanen. Foto tetap tampil sekarang, tapi hilang kalau halaman ditutup.")}};
-const Q=(k,d)=>k in MOTO?MOTO[k]:d,FP=(k,d)=>FOTO[k]||d,nat=(a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true});
-const S=Array.from({length:38},(_,i)=>{const n=i+1;return{n,nama:NAMA[i]||"Nama siswa "+pad(n),jab:JABATAN[n]||"Anggota",q:QUOTE[n]||"Moto dan hobi kamu ditulis di sini."}});
-let cat="semua";
-const GL=()=>GALERI.map(g=>({key:"g"+pad(g[0]),def:g[3]||`foto/galeri-${pad(g[0])}.jpg`,cat:g[1],t:g[2]})).concat(EXTRA.map(x=>({key:"x"+x[0],def:"",cat:x[1],t:x[2],custom:1})));
-function render(){
- const k=$("#kImg");if(k.dataset.s!==FOTO_KELAS){k.dataset.s=FOTO_KELAS;k.src=FOTO_KELAS}
- const wi={src:FP("wali",FOTO_WALI),t:WALI.nama,s:"Wali kelas · server utama",q:Q("wali",WALI.quote),key:"wali"};
- $("#wImg").innerHTML=img(wi.src,"Wali kelas",300);$("#waliNama").textContent=WALI.nama;$("#waliMapel").textContent=WALI.info;$("#waliQuote").textContent=wi.q;$("#wBtn").onclick=()=>LB.show([wi],0);
- const f=$("#cari").value.trim().toLowerCase(),list=S.filter(s=>(s.nama+" "+s.jab).toLowerCase().includes(f)),g=$("#grid");
- g.innerHTML=list.length?"":'<p class="empty">Tidak ada node dengan kata kunci itu. Coba nama lain.</p>';
- const items=list.map(s=>({src:FOTO_SISWA[s.n-1]||`foto/siswa-${pad(s.n)}.jpg`,t:s.nama,s:`${s.jab} · siswa-${pad(s.n)}`,q:Q("s"+pad(s.n),s.q),key:"s"+pad(s.n),lock:1}));
- list.forEach((s,j)=>{const b=document.createElement("button");b.className="card";b.type="button";b.setAttribute("aria-label","Lihat foto dan moto "+s.nama);
-  b.innerHTML=img(items[j].src,pad(s.n),400)+`<div class="inf"><div class="nm">${s.nama}</div><div class="rl">${s.jab}</div><div class="ip">siswa-${pad(s.n)} · 192.168.10.${s.n}</div></div>`;b.onclick=()=>LB.show(items,j);g.appendChild(b)});
- $("#cnt").textContent=`${list.length} dari 38 node online`;
- $("#oK").textContent=S[0].nama;$("#orgLv").innerHTML=[2,3,4,5,6].map(n=>`<div class="node">${JABATAN[n]}<small>${S[n-1].nama}</small></div>`).join("")+`<div class="kg"><div class="node top">Seksi Keamanan<small>koordinasi</small></div><div class="trunk"></div><div class="lv">${[7,8].map(n=>`<div class="node">${JABATAN[n]}<small>${S[n-1].nama}</small></div>`).join("")}</div></div>`;
- const all=GL();$("#prev").innerHTML=all.slice(0,4).map(x=>`<a href="#galeri">${img(FP(x.key,x.def),x.t,400,300)}</a>`).join("");
- const vis=all.filter(x=>cat==="semua"||x.cat===cat),gi=vis.map(x=>({src:FP(x.key,x.def),t:x.t,s:KAT[x.cat],q:Q(x.key,""),key:x.key,custom:x.custom})),el=$("#gal");el.innerHTML="";
- vis.forEach((x,j)=>{const b=document.createElement("button");b.type="button";b.className="pic";b.innerHTML=img(gi[j].src,x.t,400,300)+`<span class="cap">${x.t}</span>`;b.onclick=()=>LB.show(gi,j);el.appendChild(b)});
- $("#gcnt").textContent=`${vis.length} foto`}
-$("#cari").oninput=render;
-Object.entries(KAT).forEach(([k,v])=>{const b=document.createElement("button");b.className="btn"+(k===cat?" on":"");b.textContent=v;
- b.onclick=()=>{cat=k;document.querySelectorAll("#filters .btn").forEach(x=>x.classList.toggle("on",x===b));render()};$("#filters").appendChild(b)});
-const done=()=>{DB.put();warn();render()};
-$("#lf").onchange=async e=>{const f=e.target.files[0];e.target.value="";if(!f)return;const g=LB.items[LB.i],d=await rz(f);if(!d)return alert("File itu bukan gambar yang bisa dibaca.");FOTO[g.key]=d;g.src=d;done();LB.go(LB.i)};
-$("#ld").onclick=()=>{const g=LB.items[LB.i];if(g.custom){EXTRA=EXTRA.filter(x=>"x"+x[0]!==g.key);delete MOTO[g.key]}delete FOTO[g.key];LB.hide();done()};
-$("#lm").onclick=()=>{const g=LB.items[LB.i];$("#qt").value=g.q||"";$("#qe").hidden=false;$("#lbq").hidden=true;$("#qt").focus()};
-$("#qc").onclick=()=>{$("#qe").hidden=true;$("#lbq").hidden=!LB.items[LB.i].q};
-$("#qs").onclick=()=>{const g=LB.items[LB.i],v=$("#qt").value.trim().slice(0,200);MOTO[g.key]=v;g.q=v;done();LB.go(LB.i)};
-$("#addg").onchange=async e=>{const fs=[...e.target.files].sort(nat);e.target.value="";const c=cat==="semua"?"praktik":cat;for(let i=0;i<fs.length;i++){const d=await rz(fs[i]);if(d){const id=Date.now()+i;FOTO["x"+id]=d;EXTRA.push([id,c,fs[i].name.replace(/\.[^.]+$/,"")])}}done()};
-render();
-Promise.race([DB.open(),new Promise(r=>setTimeout(r,1500))]).then(()=>DB.get()).then(d=>{if(d){Object.assign(FOTO,d.f||{});EXTRA=d.x||[];Object.assign(MOTO,d.m||{})}render();route()});
-
-/* angka naik */
-const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;io.unobserve(e.target);const t=+e.target.dataset.n;let c=0;const id=setInterval(()=>{c+=Math.max(1,t/30|0);if(c>=t){c=t;clearInterval(id)}e.target.textContent=c},40)}));
-document.querySelectorAll("[data-n]").forEach(el=>io.observe(el));
-
-/* latar jaringan: berhenti saat tab disembunyikan, resize hanya bila lebar berubah */
-const cv=$("#net"),cx=cv.getContext("2d");let W=0,H=0,P=[],raf=0;
-function rs(){W=cv.width=innerWidth;H=cv.height=innerHeight;P=Array.from({length:Math.min(60,W/22|0)},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.35,vy:(Math.random()-.5)*.35}))}
-function draw(){
- cx.clearRect(0,0,W,H);cx.fillStyle=cx.strokeStyle=col;
- P.forEach((p,i)=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;
-  cx.globalAlpha=.5;cx.beginPath();cx.arc(p.x,p.y,1.8,0,7);cx.fill();
-  for(let j=i+1;j<P.length;j++){const q=P[j],dx=p.x-q.x,dy=p.y-q.y,d=Math.hypot(dx,dy);if(d<150){cx.globalAlpha=.16*(1-d/150);cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(q.x,q.y);cx.stroke()}}});
- raf=reduce||document.hidden?0:requestAnimationFrame(draw)}
-let lastW=0,rt;
-addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>{if(innerWidth===lastW&&Math.abs(innerHeight-H)<150)return;lastW=innerWidth;rs();if(!raf)draw()},200)});
-document.addEventListener("visibilitychange",()=>{if(!document.hidden&&!raf&&!reduce)draw()});
-setTema(saved||"dark");lastW=innerWidth;rs();draw();
-
-/* animasi masuk: gerbang terbuka + bar koneksi, sekali per sesi, selalu selesai */
-const go=()=>document.body.classList.add("go"),bo=$("#boot");
-if(bo){const off=()=>{if(bo.classList.contains("off"))return;bo.classList.add("off");go();setTimeout(()=>bo.remove(),900)};let seen=false;try{seen=sessionStorage.getItem("tkj-boot")}catch(e){}
- if(reduce||seen){bo.remove();go()}else{try{sessionStorage.setItem("tkj-boot","1")}catch(e){}
-  let p=0;const id=setInterval(()=>{p=Math.min(100,p+4);$("#bb").style.width=p+"%";$("#bpc").textContent="menghubungkan… "+p+"%";if(p>=100){clearInterval(id);setTimeout(off,250)}},55);
-  setTimeout(off,3000);bo.onclick=off}}else go();
-
-/* terminal: mengetik otomatis saat terlihat di layar */
-(function(){const out=$("#tout");if(!out)return;const ln="----------------------------------------";
- const L=["$ cat daftar-kelas.txt",`Kelas ${KELAS} | Angkatan ${TAHUN}`,ln,"Wali kelas : "+WALI.nama,ln].concat(S.map(s=>`${pad(s.n)}  ${s.nama.padEnd(11)} ${s.jab}`),[ln,"Total: 1 wali kelas + 38 siswa online",""]);
- const tn=document.createTextNode(""),c=document.createElement("span");c.className="cur";c.textContent="█";out.append(tn,c);
- if(reduce){tn.data=L.join("\n")+"$ ";return}
- let li=0,ci=0;const sc=()=>{out.scrollTop=out.scrollHeight};
- const step=()=>{if(li>=L.length){tn.data+="$ ";sc();return}
-  const t=L[li];if(ci<t.length){tn.data+=t[ci++];sc();setTimeout(step,li===0?60:8)}else{tn.data+="\n";li++;ci=0;sc();setTimeout(step,li===1?350:70)}};
- const ob=new IntersectionObserver(es=>{if(es[0].isIntersecting){ob.disconnect();step()}},{threshold:.3});ob.observe(out)})();
-
-/* dua halaman dalam satu file: #galeri = halaman galeri, selain itu = beranda */
-function route(){const g=location.hash==="#galeri";$("#pgH").hidden=g;$("#pgG").hidden=!g;
- document.querySelectorAll("nav .links a").forEach(a=>a.classList.toggle("on",g&&a.hash==="#galeri"));
- if(g){scrollTo(0,0)}else{const t=location.hash.length>1&&document.querySelector(location.hash);t?t.scrollIntoView():scrollTo(0,0)}}
-addEventListener("hashchange",route);route();
-</script>
-</body>
-</html>
