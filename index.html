@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TKJ Network – Website Kelas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#060a0f;--card:#0e1721cc;--solid:#0e1721;--line:#1b2a39;--tx:#d6e2ee;--mut:#7e92a6;--ac:#00ff9c;--ac2:#22d3ee;--mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;--sans:'Inter',system-ui,sans-serif}
+[data-theme=light]{--bg:#f2f6f9;--card:#ffffffe6;--solid:#fff;--line:#cfdbe5;--tx:#0f1f2d;--mut:#566b7e;--ac:#007a4d;--ac2:#0e7490}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth;scroll-padding-top:64px}
+body{background:var(--bg);color:var(--tx);font:400 16px/1.6 var(--sans);overflow-x:hidden}
+#net{position:fixed;inset:0;z-index:0;pointer-events:none}
+main,header.hero,footer{position:relative;z-index:1}
+.wrap{max-width:1120px;margin:0 auto;padding:0 18px}
+a{color:var(--ac2)}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.mono{font-family:var(--mono)}
+h1,h2,h3{font-family:var(--mono);line-height:1.2}
+h2{font-size:clamp(1.4rem,4vw,2rem);margin-bottom:6px}
+h2::before{content:"$ ";color:var(--ac)}
+.sub{color:var(--mut);margin-bottom:26px;max-width:60ch}
+section{padding:64px 0}
+
+/* nav */
+nav{position:sticky;top:0;z-index:20;background:var(--card);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;gap:14px;height:52px}
+nav b{font-family:var(--mono);color:var(--ac);white-space:nowrap}
+nav .links{display:flex;gap:16px;overflow-x:auto;flex:1;scrollbar-width:none}
+nav .links a{color:var(--tx);text-decoration:none;font-size:.9rem;white-space:nowrap}
+nav .links a:hover{color:var(--ac)}
+.btn{background:none;border:1px solid var(--line);color:var(--tx);border-radius:6px;padding:6px 11px;font:500 .85rem var(--mono);cursor:pointer}
+.btn:hover,.btn.on{border-color:var(--ac);color:var(--ac)}
+
+/* hero */
+.hero{padding:72px 0 40px}
+.prompt{color:var(--mut);font-size:.9rem}
+.hero h1{font-size:clamp(2.2rem,9vw,4.6rem);margin:10px 0 6px;letter-spacing:-.02em}
+.hero h1 span{color:var(--ac);text-shadow:0 0 28px color-mix(in srgb,var(--ac) 45%,transparent)}
+.slogan{font-size:clamp(1rem,3vw,1.4rem);color:var(--ac2)}
+.cur{animation:bl 1s steps(1) infinite}
+@keyframes bl{50%{opacity:0}}
+.stats{display:flex;gap:28px;flex-wrap:wrap;margin:26px 0 30px;font-family:var(--mono)}
+.stats div{border-left:2px solid var(--ac);padding-left:12px}
+.stats b{display:block;font-size:1.9rem;line-height:1}
+.stats span{color:var(--mut);font-size:.85rem}
+.grp{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--solid)}
+.grp img{display:block;width:100%;aspect-ratio:16/8;object-fit:cover}
+.grp figcaption{padding:8px 14px;font:.8rem var(--mono);color:var(--mut);border-top:1px solid var(--line)}
+
+/* wali kelas */
+.server{position:relative;display:flex;gap:22px;align-items:center;flex-wrap:wrap;background:var(--card);border:1px solid var(--ac);border-radius:12px;padding:22px;box-shadow:0 0 36px color-mix(in srgb,var(--ac) 14%,transparent)}
+.server img{width:150px;height:150px;border-radius:10px;object-fit:cover;border:1px solid var(--line)}
+.server h3{font-size:1.4rem}
+.badge{display:inline-block;font:.75rem var(--mono);color:var(--ac);border:1px solid var(--ac);border-radius:99px;padding:1px 10px;margin-bottom:8px}
+.server p{color:var(--mut)}
+.server blockquote{margin-top:10px;border-left:2px solid var(--ac2);padding-left:12px}
+.trunk{height:34px;width:2px;margin:0 auto;background:linear-gradient(var(--ac),var(--line))}
+
+/* siswa */
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;align-items:center}
+.tools input{flex:1;min-width:200px;background:var(--solid);border:1px solid var(--line);border-radius:6px;color:var(--tx);padding:9px 12px;font:.95rem var(--mono)}
+#cnt{color:var(--mut);font:.85rem var(--mono)}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media(min-width:720px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:1000px){.grid{grid-template-columns:repeat(4,1fr);gap:16px}}
+.card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;cursor:pointer;text-align:left;color:inherit;font:inherit;padding:0}
+.card:hover,.card.open{border-color:var(--ac)}
+.card img{display:block;width:100%;aspect-ratio:1;object-fit:cover}
+.card .inf{padding:10px 12px 12px}
+.card .nm{font-weight:600;line-height:1.3}
+.card .rl{font-size:.8rem;color:var(--ac2)}
+.card .ip{font:.72rem var(--mono);color:var(--mut);margin-top:4px}
+.card .ov{position:absolute;inset:0 0 auto 0;aspect-ratio:1;background:#050a0fe6;color:#d6e2ee;padding:14px;display:flex;flex-direction:column;justify-content:center;font-size:.88rem;opacity:0;transition:opacity .15s}
+.card:hover .ov,.card.open .ov{opacity:1}
+.card .ov i{color:#00ff9c;font:normal .75rem var(--mono);margin-bottom:6px}
+.empty{grid-column:1/-1;color:var(--mut);font-family:var(--mono)}
+
+/* galeri */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.gal{columns:2;column-gap:10px}
+@media(min-width:800px){.gal{columns:3;column-gap:14px}}
+.gal button{display:block;width:100%;margin:0 0 10px;padding:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--solid);cursor:pointer;position:relative}
+.gal button:hover{border-color:var(--ac)}
+.gal img{display:block;width:100%}
+#lb{position:fixed;inset:0;z-index:50;background:#000d;display:none;align-items:center;justify-content:center;flex-direction:column;gap:10px;padding:16px}
+#lb.on{display:flex}
+#lb img{max-width:100%;max-height:78vh;border-radius:8px}
+#lb p{color:#d6e2ee;font:.9rem var(--mono)}
+#lb .row{display:flex;gap:10px}
+
+/* struktur & jadwal */
+.org{display:flex;flex-direction:column;align-items:center;gap:0;margin-bottom:34px}
+.node{background:var(--solid);border:1px solid var(--line);border-radius:8px;padding:8px 16px;text-align:center;font-size:.9rem}
+.node small{display:block;color:var(--mut);font:.75rem var(--mono)}
+.node.top{border-color:var(--ac)}
+.lv{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.org .trunk{height:20px}
+.two{display:grid;gap:22px}
+@media(min-width:860px){.two{grid-template-columns:1.6fr 1fr}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;overflow-x:auto}
+.panel h3{font-size:1.05rem;margin-bottom:10px;color:var(--ac2)}
+table{border-collapse:collapse;width:100%;font-size:.86rem;min-width:420px}
+th,td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+th{font-family:var(--mono);color:var(--ac);font-weight:700}
+.pk{min-width:0}
+.pk td:first-child{font-family:var(--mono);color:var(--ac)}
+
+/* proyek */
+.proj{display:grid;gap:16px}
+@media(min-width:800px){.proj{grid-template-columns:repeat(3,1fr)}}
+.pc{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
+.pc img{width:100%;aspect-ratio:16/10;object-fit:cover;display:block}
+.pc div{padding:14px}
+.pc h3{font-size:1.05rem;margin-bottom:4px}
+.pc p{color:var(--mut);font-size:.9rem}
+pre{margin-top:10px;background:#050a0f;color:#00ff9c;border-radius:6px;padding:10px;font:.75rem/1.5 var(--mono);overflow-x:auto}
+
+footer{border-top:1px solid var(--line);padding:30px 0;background:var(--card);margin-top:40px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;align-items:center}
+footer .so{display:flex;gap:14px;flex-wrap:wrap}
+
+/* loader */
+#boot{position:fixed;inset:0;z-index:99;background:#060a0f;color:#00ff9c;display:flex;align-items:center;justify-content:center;font:.95rem/1.8 var(--mono);transition:opacity .4s}
+#boot.off{opacity:0;pointer-events:none}
+#boot pre{background:none;margin:0;padding:0 18px;color:inherit;font-size:.95rem}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div id="boot"><pre id="bt"></pre></div>
+<canvas id="net" aria-hidden="true"></canvas>
+
+<nav><div class="wrap">
+  <b>TKJ.net</b>
+  <div class="links">
+    <a href="#beranda">Beranda</a><a href="#wali">Wali Kelas</a><a href="#siswa">Anggota</a><a href="#galeri">Galeri</a><a href="#struktur">Struktur</a><a href="#proyek">Proyek</a><a href="#kontak">Kontak</a>
+  </div>
+  <button class="btn" id="tema" aria-label="Ganti mode terang atau gelap">Mode</button>
+</div></nav>
+
+<header class="hero" id="beranda"><div class="wrap">
+  <p class="prompt mono">$ ping tkj-network.local</p>
+  <h1>Kelas <span id="namaKelas">XII TKJ 1</span></h1>
+  <p class="slogan mono">Connected, Always<span class="cur">_</span></p>
+  <div class="stats">
+    <div><b data-n="38">0</b><span>Siswa</span></div>
+    <div><b data-n="1">0</b><span>Wali kelas</span></div>
+    <div><b id="thn">2026</b><span>Angkatan</span></div>
+  </div>
+  <figure class="grp">
+    <img id="fotoKelas" src="foto/kelas.jpg" alt="Foto bersama satu kelas" data-ph="Foto bersama kelas" data-w="1000" data-h="500">
+    <figcaption>Semua node online: 38 siswa terhubung ke 1 wali kelas.</figcaption>
+  </figure>
+</div></header>
+
+<main>
+<section id="wali"><div class="wrap">
+  <h2>Wali kelas</h2>
+  <p class="sub">Server utama yang menjaga semua node kelas tetap terhubung.</p>
+  <div class="server">
+    <img id="fotoWali" src="foto/wali-kelas.jpg" alt="Foto wali kelas" data-ph="Wali kelas">
+    <div>
+      <span class="badge mono">● server utama</span>
+      <h3 id="waliNama">Nama Wali Kelas, S.Kom.</h3>
+      <p id="waliMapel">Guru produktif Teknik Komputer dan Jaringan</p>
+      <blockquote id="waliQuote">Jaringan terbaik dibangun dari kerja sama, bukan dari kabel yang paling mahal.</blockquote>
+    </div>
+  </div>
+  <div class="trunk"></div>
+</div></section>
+
+<section id="siswa"><div class="wrap">
+  <h2>Anggota kelas</h2>
+  <p class="sub">Setiap siswa adalah satu node. Arahkan kursor atau ketuk kartu untuk melihat quote dan hobi.</p>
+  <div class="tools">
+    <input id="cari" type="search" placeholder="cari nama atau jabatan..." aria-label="Cari siswa">
+    <span id="cnt"></span>
+  </div>
+  <div class="grid" id="grid"></div>
+</div></section>
+
+<section id="galeri"><div class="wrap">
+  <h2>Galeri</h2>
+  <p class="sub">Dokumentasi kegiatan kelas. Klik foto untuk memperbesar.</p>
+  <div class="filters" id="filters"></div>
+  <div class="gal" id="gal"></div>
+</div></section>
+
+<section id="struktur"><div class="wrap">
+  <h2>Struktur kelas dan jadwal</h2>
+  <p class="sub">Siapa mengurus apa, kapan belajar, dan siapa yang piket hari ini.</p>
+  <div class="org">
+    <div class="node top">Wali kelas<small>server utama</small></div><div class="trunk"></div>
+    <div class="node">Ketua kelas<small id="oK">Nama siswa</small></div><div class="trunk"></div>
+    <div class="lv" id="orgLv"></div>
+  </div>
+  <div class="two">
+    <div class="panel"><h3>Jadwal pelajaran</h3><table id="jadwal"></table></div>
+    <div class="panel pk"><h3>Jadwal piket</h3><table id="piket"></table></div>
+  </div>
+</div></section>
+
+<section id="proyek"><div class="wrap">
+  <h2>Karya dan proyek</h2>
+  <p class="sub">Hasil praktik kami di laboratorium jaringan.</p>
+  <div class="proj">
+    <article class="pc"><img src="foto/proyek-topologi.jpg" alt="Topologi jaringan" data-ph="Topologi jaringan" data-w="640" data-h="400"><div><h3>Topologi jaringan kelas</h3><p>Rancangan topologi star dengan satu router dan tiga switch untuk lab.</p></div></article>
+    <article class="pc"><img src="foto/proyek-kabel.jpg" alt="Instalasi kabel" data-ph="Instalasi kabel UTP" data-w="640" data-h="400"><div><h3>Instalasi kabel UTP</h3><p>Crimping kabel straight dan crossover sesuai standar T568B.</p></div></article>
+    <article class="pc"><img src="foto/proyek-mikrotik.jpg" alt="Konfigurasi Mikrotik" data-ph="Konfigurasi Mikrotik" data-w="640" data-h="400"><div><h3>Konfigurasi Mikrotik</h3><p>Setting IP, DHCP server, dan NAT pada RouterOS.</p><pre>/ip address add address=192.168.10.1/24 interface=ether2
+/ip pool add name=kelas ranges=192.168.10.10-192.168.10.50
+/ip firewall nat add chain=srcnat out-interface=ether1 action=masquerade</pre></div></article>
+  </div>
+</div></section>
+</main>
+
+<footer id="kontak"><div class="wrap">
+  <div><b class="mono" style="color:var(--ac)">TKJ.net</b><br><span style="color:var(--mut)" id="foot">Kelas XII TKJ 1 · Angkatan 2026</span></div>
+  <div class="so">
+    <a href="https://instagram.com/" target="_blank" rel="noopener">Instagram kelas</a>
+    <a href="https://tiktok.com/" target="_blank" rel="noopener">TikTok kelas</a>
+    <a href="mailto:kelas@example.com">Email kelas</a>
+  </div>
+</div></footer>
+
+<div id="lb" role="dialog" aria-modal="true" aria-label="Pratinjau foto">
+  <img id="lbi" alt=""><p id="lbc"></p>
+  <div class="row"><button class="btn" id="lp">Sebelumnya</button><button class="btn" id="ln">Berikutnya</button><button class="btn" id="lx">Tutup</button></div>
+</div>
+
+<script>
+/* ===== EDIT DI SINI ===== */
+const KELAS = "XII TKJ 1", TAHUN = "2026";
+// Isi 38 nama sesuai nomor absen. Foto: foto/siswa-01.jpg, siswa-02.jpg, dst.
+const NAMA = [];
+const JABATAN = {1:"Ketua kelas",2:"Wakil ketua",3:"Sekretaris",4:"Bendahara",5:"Seksi kebersihan",6:"Seksi keamanan"};
+const QUOTE = {};   // contoh: {1:"Hobi: ngoding. Quote: no bug, no gain."}
+const GALERI = [    // file: foto/galeri-01.jpg dst.
+  ["praktik","Crimping kabel UTP"],["praktik","Setting router Mikrotik"],["study","Kunjungan ke data center"],
+  ["meeting","Final class meeting"],["lucu","Kabel kusut sebelum praktik"],["praktik","Pengujian koneksi LAN"],
+  ["study","Study tour industri"],["meeting","Lomba antar kelas"],["lucu","Foto gagal tapi dikenang"],
+  ["praktik","Merakit PC di lab"],["study","Foto di depan kantor ISP"],["lucu","Piket yang terlalu santai"]
+];
+const KAT = {semua:"Semua",praktik:"Praktik",study:"Study tour",meeting:"Class meeting",lucu:"Momen lucu"};
+const JADWAL = {
+  Senin:["Upacara","Matematika","Bahasa Indonesia","Administrasi Infrastruktur Jaringan"],
+  Selasa:["Bahasa Inggris","Teknologi Layanan Jaringan","Teknologi Layanan Jaringan","PKn"],
+  Rabu:["Administrasi Sistem Jaringan","Administrasi Sistem Jaringan","PJOK","Bahasa Indonesia"],
+  Kamis:["Produktif TKJ","Produktif TKJ","Produktif TKJ","Matematika"],
+  Jumat:["Pendidikan Agama","Bahasa Inggris","Seni Budaya","Bimbingan kelas"]
+};
+const PIKET = {Senin:"Siswa 01–07",Selasa:"Siswa 08–14",Rabu:"Siswa 15–21",Kamis:"Siswa 22–28",Jumat:"Siswa 29–38"};
+/* ======================== */
+
+const $ = s => document.querySelector(s), pad = n => String(n).padStart(2,"0");
+const ph = (t,w=400,h=w) => "data:image/svg+xml;utf8," + encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="#10202c"/><g fill="none" stroke="#00ff9c" opacity=".4"><circle cx="${w/2}" cy="${h*.38}" r="${Math.min(w,h)*.14}"/><path d="M${w*.28} ${h*.8}Q${w/2} ${h*.45} ${w*.72} ${h*.8}"/></g><text x="${w/2}" y="${h*.93}" fill="#7e92a6" font-family="monospace" font-size="${Math.max(12,Math.min(w,h)*.055)}" text-anchor="middle">${t}</text></svg>`);
+function safeImg(img){
+  img.addEventListener("error",()=>{img.onerror=null;img.src=ph(img.dataset.ph||"foto",+img.dataset.w||400,+img.dataset.h||(+img.dataset.w||400))},{once:true});
+  if(img.complete&&img.naturalWidth===0)img.dispatchEvent(new Event("error"));
+}
+document.querySelectorAll("img[data-ph]").forEach(safeImg);
+$("#namaKelas").textContent = KELAS; $("#thn").textContent = TAHUN;
+$("#foot").textContent = `Kelas ${KELAS} · Angkatan ${TAHUN}`;
+
+/* tema */
+const root = document.documentElement;
+function setTema(t){root.dataset.theme=t;$("#tema").textContent=t==="dark"?"Mode terang":"Mode gelap";warna();try{localStorage.setItem("tkj-tema",t)}catch(e){}}
+let saved=null;try{saved=localStorage.getItem("tkj-tema")}catch(e){}
+$("#tema").onclick=()=>setTema(root.dataset.theme==="dark"?"light":"dark");
+
+/* siswa */
+const S = Array.from({length:38},(_,i)=>{const n=i+1;return{n,nama:NAMA[i]||"Nama siswa "+pad(n),jab:JABATAN[n]||"Anggota",q:QUOTE[n]||"Hobi dan quote kamu ditulis di sini."}});
+function renderS(f=""){
+  const k=f.trim().toLowerCase(),list=S.filter(s=>(s.nama+" "+s.jab).toLowerCase().includes(k));
+  $("#grid").innerHTML=list.length?"":'<p class="empty">Tidak ada node dengan kata kunci itu. Coba nama lain.</p>';
+  list.forEach(s=>{
+    const b=document.createElement("button");b.className="card";b.type="button";
+    b.innerHTML=`<img src="foto/siswa-${pad(s.n)}.jpg" alt="Foto ${s.nama}" loading="lazy" data-ph="${pad(s.n)}"><div class="ov"><i>// ${s.nama}</i>${s.q}</div><div class="inf"><div class="nm">${s.nama}</div><div class="rl">${s.jab}</div><div class="ip">siswa-${pad(s.n)} · 192.168.10.${s.n}</div></div>`;
+    safeImg(b.querySelector("img"));
+    b.onclick=()=>b.classList.toggle("open");
+    $("#grid").appendChild(b);
+  });
+  $("#cnt").textContent=`${list.length} dari 38 node online`;
+}
+$("#cari").oninput=e=>renderS(e.target.value);renderS();
+
+/* galeri */
+let cat="semua",vis=[],idx=0;
+function renderG(){
+  vis=GALERI.map((g,i)=>({c:g[0],t:g[1],i})).filter(g=>cat==="semua"||g.c===cat);
+  $("#gal").innerHTML="";
+  vis.forEach((g,j)=>{
+    const b=document.createElement("button");b.type="button";
+    const h=[260,340,300][g.i%3];
+    b.innerHTML=`<img src="foto/galeri-${pad(g.i+1)}.jpg" alt="${g.t}" loading="lazy" data-ph="${g.t}" data-w="400" data-h="${h}">`;
+    safeImg(b.querySelector("img"));b.onclick=()=>open(j);$("#gal").appendChild(b);
+  });
+}
+Object.entries(KAT).forEach(([k,v])=>{
+  const b=document.createElement("button");b.className="btn"+(k===cat?" on":"");b.textContent=v;
+  b.onclick=()=>{cat=k;document.querySelectorAll("#filters .btn").forEach(x=>x.classList.toggle("on",x===b));renderG()};
+  $("#filters").appendChild(b);
+});renderG();
+function open(j){idx=(j+vis.length)%vis.length;const g=vis[idx],im=$("#lbi");im.src=`foto/galeri-${pad(g.i+1)}.jpg`;im.alt=g.t;im.dataset.ph=g.t;im.dataset.w=900;im.dataset.h=600;safeImg(im);$("#lbc").textContent=`${g.t} (${idx+1}/${vis.length})`;$("#lb").classList.add("on")}
+const tutup=()=>$("#lb").classList.remove("on");
+$("#lx").onclick=tutup;$("#lp").onclick=()=>open(idx-1);$("#ln").onclick=()=>open(idx+1);
+$("#lb").onclick=e=>{if(e.target.id==="lb")tutup()};
+addEventListener("keydown",e=>{if(!$("#lb").classList.contains("on"))return;if(e.key==="Escape")tutup();if(e.key==="ArrowLeft")open(idx-1);if(e.key==="ArrowRight")open(idx+1)});
+
+/* struktur & jadwal */
+$("#oK").textContent=S[0].nama;
+$("#orgLv").innerHTML=[2,3,4,5,6].map(n=>`<div class="node">${JABATAN[n]}<small>${S[n-1].nama}</small></div>`).join("");
+const hari=Object.keys(JADWAL),maxJ=Math.max(...hari.map(h=>JADWAL[h].length));
+$("#jadwal").innerHTML="<tr><th>Hari</th>"+Array.from({length:maxJ},(_,i)=>`<th>Sesi ${i+1}</th>`).join("")+"</tr>"+hari.map(h=>`<tr><td class="mono">${h}</td>${JADWAL[h].map(m=>`<td>${m}</td>`).join("")}</tr>`).join("");
+$("#piket").innerHTML="<tr><th>Hari</th><th>Petugas</th></tr>"+Object.entries(PIKET).map(([h,p])=>`<tr><td>${h}</td><td>${p}</td></tr>`).join("");
+
+/* hitung naik */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;io.unobserve(e.target);const t=+e.target.dataset.n;let c=0;const id=setInterval(()=>{c+=Math.max(1,t/30|0);if(c>=t){c=t;clearInterval(id)}e.target.textContent=c},40)}));
+document.querySelectorAll("[data-n]").forEach(el=>io.observe(el));
+
+/* jaringan background */
+const cv=$("#net"),cx=cv.getContext("2d");let W,H,P=[],col="#00ff9c";
+function warna(){col=getComputedStyle(root).getPropertyValue("--ac").trim()||col}
+function rs(){W=cv.width=innerWidth;H=cv.height=innerHeight;P=Array.from({length:Math.min(64,W/20|0)},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.35,vy:(Math.random()-.5)*.35}))}
+function draw(){
+  cx.clearRect(0,0,W,H);cx.fillStyle=cx.strokeStyle=col;
+  P.forEach((p,i)=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;
+    cx.globalAlpha=.5;cx.beginPath();cx.arc(p.x,p.y,1.8,0,7);cx.fill();
+    for(let j=i+1;j<P.length;j++){const q=P[j],d=Math.hypot(p.x-q.x,p.y-q.y);if(d<150){cx.globalAlpha=.16*(1-d/150);cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(q.x,q.y);cx.stroke()}}});
+  if(!reduce)requestAnimationFrame(draw);
+}
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+addEventListener("resize",()=>{rs();if(reduce)draw()});
+setTema(saved||"dark");rs();draw();
+
+/* loader ping */
+const bt=$("#bt"),L=["> ping tkj-network.local","Reply: bytes=32 time=1ms TTL=64","Reply: bytes=32 time=1ms TTL=64","38 siswa + 1 wali kelas: online"];let li=0;
+function boot(){if(reduce){$("#boot").classList.add("off");return}
+  const id=setInterval(()=>{if(li<L.length){bt.textContent+=L[li++]+"\n"}else{clearInterval(id);setTimeout(()=>$("#boot").classList.add("off"),350)}},320)}
+boot();
+</script>
+</body>
+</html>
