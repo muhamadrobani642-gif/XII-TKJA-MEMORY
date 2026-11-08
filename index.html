@@ -315,3 +315,191 @@ const GALERI=[
   [1,"Tes Camera","Camera Majapahit","majapahit.jpg"],
   [2,"Dramak","Latihan Drama","latihan.jpg"],
   [5,"lucu","Kabel kusut sebelum praktik","foto/galeri-05.jpg"],
+  [6,"praktik","Pengujian koneksi LAN","foto/galeri-06.jpg"],
+  [9,"lucu","Foto gagal tapi dikenang","foto/galeri-09.jpg"],
+  [10,"praktik","Merakit PC di lab","foto/galeri-10.jpg"],
+  [12,"lucu","Piket yang terlalu santai","foto/galeri-12.jpg"],
+];
+const KAT={semua:"Semua",praktik:"Praktik",lucu:"Momen lucu"};
+/* ======================== */
+const FOTO={},MOTO={};let EXTRA=[],pend=false;
+const $=s=>document.querySelector(s),pad=n=>String(n).padStart(2,"0"),root=document.documentElement;
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const ph=(t,w=400,h=w)=>"data:image/svg+xml;utf8,"+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="#10202c"/><g fill="none" stroke="#00ff9c" opacity=".4"><circle cx="${w/2}" cy="${h*.38}" r="${Math.min(w,h)*.14}"/><path d="M${w*.28} ${h*.8}Q${w/2} ${h*.45} ${w*.72} ${h*.8}"/></g><text x="${w/2}" y="${h*.93}" fill="#7e92a6" font-family="monospace" font-size="${Math.max(12,Math.min(w,h)*.055)}" text-anchor="middle">${t}</text></svg>`);
+/* foto gagal dimuat -> placeholder (satu listener untuk semua gambar) */
+document.addEventListener("error",e=>{const i=e.target;if(i.tagName!=="IMG"||i.src.startsWith("data:"))return;i.src=ph(i.dataset.ph||"foto",+i.dataset.w||400,+i.dataset.h||+i.dataset.w||400)},true);
+const img=(src,t,w,h)=>`<img src="${src}" alt="${t}" loading="lazy" data-ph="${t}" data-w="${w||400}" data-h="${h||w||400}">`;
+
+/* tema */
+function warna(){col=getComputedStyle(root).getPropertyValue("--ac").trim()||col}
+function setTema(t){root.dataset.theme=t;$("#tema").textContent=t==="dark"?"Mode terang":"Mode gelap";warna();try{localStorage.setItem("tkj-tema",t)}catch(e){}}
+let saved=null,col="#00ff9c";try{saved=localStorage.getItem("tkj-tema")}catch(e){}
+$("#tema").onclick=()=>setTema(root.dataset.theme==="dark"?"light":"dark");
+$("#mn").onclick=()=>$("nav").classList.toggle("open");
+document.querySelectorAll("nav .links a").forEach(a=>a.addEventListener("click",()=>$("nav").classList.remove("open")));
+document.querySelectorAll("[data-kelas]").forEach(e=>e.textContent=KELAS);
+document.querySelectorAll("[data-thn]").forEach(e=>e.textContent=TAHUN);
+$("#foot").textContent=`Kelas ${KELAS} · Angkatan ${TAHUN}`;
+
+/* lightbox: foto + moto */
+const LB={items:[],i:0,last:null,
+ show(items,i){this.items=items;this.last=document.activeElement;this.go(i);$("#lb").classList.add("on");document.body.style.overflow="hidden";$("#lx").focus()},
+ go(i){const n=this.items.length;this.i=(i+n)%n;const g=this.items[this.i],im=$("#lbi");
+  im.dataset.ph=g.t;im.dataset.w=900;im.dataset.h=600;im.alt=g.t;im.src=g.src;
+  $("#lbt").textContent=g.t;$("#lbs").textContent=g.s||"";$("#lbq").textContent=g.q||"";$("#lbq").hidden=!g.q;$("#qe").hidden=true;$("#qst").hidden=true;$("#lm").hidden=!g.key;
+  $("#lbn").textContent=n>1?`${this.i+1} / ${n}`:"";$("#lp").hidden=$("#ln").hidden=n<2;$("#lu").hidden=!g.key||!!g.lock;$("#ld").hidden=!g.key||!!g.lock||(!g.custom&&!FOTO[g.key]);$("#ld").textContent=g.custom?"Hapus foto":"Reset foto"},
+ hide(){$("#lb").classList.remove("on");document.body.style.overflow="";if(this.last)this.last.focus();if(pend){pend=false;render()}}};
+$("#lx").onclick=()=>LB.hide();$("#lp").onclick=()=>LB.go(LB.i-1);$("#ln").onclick=()=>LB.go(LB.i+1);
+$("#lb").onclick=e=>{if(e.target.id==="lb")LB.hide()};
+addEventListener("keydown",e=>{if(!$("#lb").classList.contains("on"))return;if(e.target.tagName==="TEXTAREA"){if(e.key==="Escape")$("#qc").click();return}if(e.key==="Escape")LB.hide();if(e.key==="ArrowLeft")LB.go(LB.i-1);if(e.key==="ArrowRight")LB.go(LB.i+1)});
+
+/* penyimpanan foto sendiri (IndexedDB di browser) */
+const DB={db:null,open(){return new Promise(r=>{try{const q=indexedDB.open("tkj-foto",1);q.onupgradeneeded=()=>q.result.createObjectStore("f");q.onsuccess=()=>{this.db=q.result;r()};q.onerror=q.onblocked=()=>r()}catch(e){r()}})},
+ get(){return new Promise(r=>{if(!this.db)return r();try{const q=this.db.transaction("f").objectStore("f").get("d");q.onsuccess=()=>r(q.result);q.onerror=()=>r()}catch(e){r()}})},
+ put(){if(!this.db)return;try{const t=this.db.transaction("f","readwrite");t.objectStore("f").put({f:FOTO,x:EXTRA,m:MOTO},"d");t.onerror=()=>alert("Penyimpanan penuh. Hapus beberapa foto lalu coba lagi.")}catch(e){}}};
+const rz=f=>new Promise(r=>{const u=URL.createObjectURL(f),i=new Image();i.onload=()=>{const k=Math.min(1,900/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext("2d").drawImage(i,0,0,c.width,c.height);URL.revokeObjectURL(u);r(c.toDataURL("image/jpeg",.82))};i.onerror=()=>r(null);i.src=u});
+const warn=()=>{if(!DB.db&&!warn.s){warn.s=1;alert("Browser ini tidak bisa menyimpan foto permanen. Foto tetap tampil sekarang, tapi hilang kalau halaman ditutup.")}};
+const Q=(k,d)=>k in MOTO?MOTO[k]:d,FP=(k,d)=>FOTO[k]||d,nat=(a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true});
+const S=Array.from({length:38},(_,i)=>{const n=i+1;return{n,nama:NAMA[i]||"Nama siswa "+pad(n),jab:JABATAN[n]||"Anggota",q:QUOTE[n]||"Moto dan hobi kamu ditulis di sini."}});
+const sItem=s=>({src:FOTO_SISWA[s.n-1]||`foto/siswa-${pad(s.n)}.jpg`,t:s.nama,s:`${s.jab} · siswa-${pad(s.n)}`,q:Q("s"+pad(s.n),s.q),key:"s"+pad(s.n),lock:1});
+let cat="semua";
+const GL=()=>GALERI.map(g=>({key:"g"+pad(g[0]),def:g[3]||`foto/galeri-${pad(g[0])}.jpg`,cat:g[1],t:g[2]})).concat(EXTRA.map(x=>({key:"x"+x[0],def:"",cat:x[1],t:x[2],custom:1})));
+function render(){
+ const k=$("#kImg");if(k.dataset.s!==FOTO_KELAS){k.dataset.s=FOTO_KELAS;k.src=FOTO_KELAS}
+ const wi={src:FP("wali",FOTO_WALI),t:WALI.nama,s:"Wali kelas · server utama",q:Q("wali",WALI.quote),key:"wali"};
+ $("#wImg").innerHTML=img(wi.src,"Wali kelas",300);$("#waliNama").textContent=WALI.nama;$("#waliMapel").textContent=WALI.info;$("#waliQuote").textContent=wi.q;$("#wBtn").onclick=()=>LB.show([wi],0);
+ const f=$("#cari").value.trim().toLowerCase(),list=S.filter(s=>(s.nama+" "+s.jab).toLowerCase().includes(f)),g=$("#grid");
+ g.innerHTML=list.length?"":'<p class="empty">Tidak ada node dengan kata kunci itu. Coba nama lain.</p>';
+ const items=list.map(sItem);
+ list.forEach((s,j)=>{const b=document.createElement("button");b.className="card";b.type="button";b.setAttribute("aria-label","Lihat foto dan moto "+s.nama);
+  b.innerHTML=img(items[j].src,pad(s.n),400)+`<div class="inf"><div class="nm">${s.nama}</div><div class="rl">${s.jab}</div><div class="ip">siswa-${pad(s.n)} · 192.168.10.${s.n}</div></div>`;if(MOTO["s"+pad(s.n)]||QUOTE[s.n]){const m=document.createElement("div");m.className="mt";m.textContent="“"+items[j].q+"”";b.querySelector(".inf").appendChild(m)}
+  b.onclick=()=>LB.show(items,j);g.appendChild(b)});
+ $("#cnt").textContent=`${list.length} dari 38 node online`;
+ $("#oK").textContent=S[0].nama;const nd=n=>`<div class="node">${JABATAN[n]}<small>${S[n-1].nama}</small></div>`;
+ $("#orgLv").innerHTML=[2,3,4,5,6].map(n=>`<li class="ch">${nd(n)}</li>`).join("")+`<li class="ch"><div class="node top">Seksi Keamanan<small>koordinasi</small></div><div class="trunk"></div><ul class="lv">${[7,8].map(n=>`<li class="ch">${nd(n)}</li>`).join("")}</ul></li>`;
+ const all=GL();$("#prev").innerHTML=all.slice(0,4).map(x=>`<a href="#galeri">${img(FP(x.key,x.def),x.t,400,300)}</a>`).join("");
+ const vis=all.filter(x=>cat==="semua"||x.cat===cat),gi=vis.map(x=>({src:FP(x.key,x.def),t:x.t,s:KAT[x.cat],q:Q(x.key,""),key:x.key,custom:x.custom})),el=$("#gal");el.innerHTML="";
+ vis.forEach((x,j)=>{const b=document.createElement("button");b.type="button";b.className="pic";b.innerHTML=img(gi[j].src,x.t,400,300)+`<span class="cap">${x.t}</span>`;b.onclick=()=>LB.show(gi,j);el.appendChild(b)});
+ $("#gcnt").textContent=`${vis.length} foto`}
+$("#cari").oninput=render;
+Object.entries(KAT).forEach(([k,v])=>{const b=document.createElement("button");b.className="btn"+(k===cat?" on":"");b.textContent=v;
+ b.onclick=()=>{cat=k;document.querySelectorAll("#filters .btn").forEach(x=>x.classList.toggle("on",x===b));render()};$("#filters").appendChild(b)});
+const done=()=>{DB.put();warn();render()};
+$("#lf").onchange=async e=>{const f=e.target.files[0];e.target.value="";if(!f)return;const g=LB.items[LB.i],d=await rz(f);if(!d)return alert("File itu bukan gambar yang bisa dibaca.");FOTO[g.key]=d;g.src=d;done();LB.go(LB.i)};
+$("#ld").onclick=()=>{const g=LB.items[LB.i];if(g.custom){EXTRA=EXTRA.filter(x=>"x"+x[0]!==g.key);delete MOTO[g.key]}delete FOTO[g.key];LB.hide();done()};
+$("#lm").onclick=()=>{const g=LB.items[LB.i];$("#qh").textContent=RM.on?"Moto ini akan terlihat oleh semua pengunjung website.":"Moto hanya tersimpan di browser ini (website belum terhubung ke server moto).";$("#qt").value=g.q||"";$("#qe").hidden=false;$("#lbq").hidden=true;$("#qt").focus()};
+$("#qc").onclick=()=>{$("#qe").hidden=true;$("#lbq").hidden=!LB.items[LB.i].q};
+$("#qs").onclick=async()=>{const g=LB.items[LB.i],v=$("#qt").value.trim().slice(0,200);MOTO[g.key]=v;g.q=v;DB.put();render();LB.go(LB.i);
+ if(!RM.on){warn();return}
+ const st=$("#qst"),say=m=>{if(LB.items[LB.i]===g){st.textContent=m;st.hidden=false}};say("Menyimpan moto ke server…");
+ try{await RM.save(g.key,v);say("✓ Moto tersimpan dan bisa dilihat semua pengunjung.")}catch(e){say("Gagal menyimpan ke server. Moto hanya tersimpan di perangkat ini.")}};
+$("#addg").onchange=async e=>{const fs=[...e.target.files].sort(nat);e.target.value="";const c=cat==="semua"?"praktik":cat;for(let i=0;i<fs.length;i++){const d=await rz(fs[i]);if(d){const id=Date.now()+i;FOTO["x"+id]=d;EXTRA.push([id,c,fs[i].name.replace(/\.[^.]+$/,"")])}}done()};
+/* moto bersama lewat Firebase Realtime Database (REST, tanpa library) */
+const RM={on:!!MOTO_URL,base:MOTO_URL.replace(/\/+$/,""),
+ async load(){if(!this.on)return false;try{const r=await fetch(this.base+"/moto.json",{cache:"no-store"});if(!r.ok)throw 0;const d=await r.json()||{},n={};
+   Object.keys(d).forEach(k=>{if(typeof d[k]==="string")n[k]=d[k].slice(0,200)});
+   const ch=JSON.stringify(n)!==JSON.stringify(MOTO);Object.keys(MOTO).forEach(k=>delete MOTO[k]);Object.assign(MOTO,n);return ch}catch(e){return false}},
+ async save(k,v){const r=await fetch(`${this.base}/moto/${encodeURIComponent(k)}.json`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(v)});if(!r.ok)throw new Error(r.status)}};
+const sync=async()=>{if(!RM.on||document.hidden)return;if(!await RM.load())return;if($("#lb").classList.contains("on"))pend=true;else{DB.put();render()}};
+setInterval(sync,20000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)sync()});
+render();
+Promise.race([DB.open(),new Promise(r=>setTimeout(r,1500))]).then(()=>DB.get()).then(d=>{if(d){Object.assign(FOTO,d.f||{});EXTRA=d.x||[];Object.assign(MOTO,d.m||{})}render();route();sync()});
+
+/* angka naik */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;io.unobserve(e.target);const t=+e.target.dataset.n;let c=0;const id=setInterval(()=>{c+=Math.max(1,t/30|0);if(c>=t){c=t;clearInterval(id)}e.target.textContent=c},40)}));
+document.querySelectorAll("[data-n]").forEach(el=>io.observe(el));
+
+/* latar jaringan: berhenti saat tab disembunyikan, resize hanya bila lebar berubah */
+const cv=$("#net"),cx=cv.getContext("2d");let W=0,H=0,P=[],raf=0;
+function rs(){W=cv.width=innerWidth;H=cv.height=innerHeight;P=Array.from({length:Math.min(60,W/22|0)},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.35,vy:(Math.random()-.5)*.35}))}
+function draw(){
+ cx.clearRect(0,0,W,H);cx.fillStyle=cx.strokeStyle=col;
+ P.forEach((p,i)=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;
+  cx.globalAlpha=.5;cx.beginPath();cx.arc(p.x,p.y,1.8,0,7);cx.fill();
+  for(let j=i+1;j<P.length;j++){const q=P[j],dx=p.x-q.x,dy=p.y-q.y,d=Math.hypot(dx,dy);if(d<150){cx.globalAlpha=.16*(1-d/150);cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(q.x,q.y);cx.stroke()}}});
+ raf=reduce||document.hidden?0:requestAnimationFrame(draw)}
+let lastW=0,rt;
+addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>{if(innerWidth===lastW&&Math.abs(innerHeight-H)<150)return;lastW=innerWidth;rs();if(!raf)draw()},200)});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&!raf&&!reduce)draw()});
+setTema(saved||"dark");lastW=innerWidth;rs();draw();
+
+/* animasi masuk: gerbang terbuka + bar koneksi, sekali per sesi, selalu selesai */
+const go=()=>document.body.classList.add("go"),bo=$("#boot");
+if(bo){const off=()=>{if(bo.classList.contains("off"))return;bo.classList.add("off");go();setTimeout(()=>bo.remove(),900)};let seen=false;try{seen=sessionStorage.getItem("tkj-boot")}catch(e){}
+ if(reduce||seen){bo.remove();go()}else{try{sessionStorage.setItem("tkj-boot","1")}catch(e){}
+  let p=0;const id=setInterval(()=>{p=Math.min(100,p+4);$("#bb").style.width=p+"%";$("#bpc").textContent="menghubungkan… "+p+"%";if(p>=100){clearInterval(id);setTimeout(off,250)}},55);
+  setTimeout(off,3000);bo.onclick=off}}else go();
+
+/* topologi jaringan: wali kelas = server (tengah), 38 siswa = node. Hover = nama, klik = foto + moto */
+(function(){
+ const box=$("#topo"),cv=$("#tc");if(!box||!cv)return;
+ const c=cv.getContext("2d"),tip=$("#tip"),FONT="11px 'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace",PI2=Math.PI*2;
+ let w=0,h=0,N=[],E=[],ES=[],EU=[],PAR=[],K=[],X=[],Y=[],FL=new Float32Array(39),hov=-1,raf=0,vis=true,th="",C={},labels=true,last=0;
+ const col=()=>{const s=getComputedStyle(root),g=k=>s.getPropertyValue(k).trim();C={ac:g("--ac"),ac2:g("--ac2"),tx:g("--tx"),mut:g("--mut"),bg:g("--solid")};th=root.dataset.theme};
+ function lay(){
+  const r=box.getBoundingClientRect(),d=Math.min(2,devicePixelRatio||1);if(!r.width)return;
+  w=r.width;h=r.height;cv.width=Math.round(w*d);cv.height=Math.round(h*d);c.setTransform(d,0,0,d,0,0);c.font=FONT;
+  labels=w>=760;
+  const rx=w/2-(labels?104:26),ry=h/2-(labels?38:26),cx=w/2,cy=h/2;
+  N=[{x:cx,y:cy,r:20,d:0,s:0,p:0}];E=[];ES=[];EU=[];PAR=[];K=[];
+  const mk=(a,k,rr)=>({x:cx+Math.cos(a)*rx*k,y:cy+Math.sin(a)*ry*k,a,r:rr,d:1.5+Math.random()*2.5,s:.5+Math.random()*.6,p:Math.random()*PI2});
+  for(let j=0;j<12;j++)N.push(mk(-Math.PI/2+j/12*PI2,.5,9));
+  for(let j=0;j<26;j++)N.push(mk(-Math.PI/2+(j+.5)/26*PI2,1,7));
+  for(let i=1;i<=12;i++){ES[i]=E.length;E.push([0,i,1])}
+  for(let j=13;j<=38;j++){const p=1+(Math.round((j-12.5)/26*12)%12);PAR[j]=p;EU[j]=E.length;E.push([p,j,2])}
+  for(let i=1;i<=12;i++)E.push([i,i%12+1,3]);
+  for(let j=13;j<=38;j++)E.push([j,j===38?13:j+1,3]);
+  for(let i=1;i<=38;i++){N[i].lw=c.measureText(S[i-1].nama).width;X[i]=N[i].x;Y[i]=N[i].y}X[0]=cx;Y[0]=cy}
+ const pill=(txt,x,y,al,lw,hl)=>{const x0=al==="left"?x:al==="right"?x-lw:x-lw/2;c.globalAlpha=.82;c.fillStyle=C.bg;c.beginPath();c.roundRect?c.roundRect(x0-4,y-9,lw+8,18,5):c.rect(x0-4,y-9,lw+8,18);c.fill();c.globalAlpha=1;c.fillStyle=hl?C.ac:C.tx;c.textAlign="left";c.fillText(txt,x0,y)};
+ const spawn=()=>{const j=1+Math.floor(Math.random()*38);let p=j<=12?[[ES[j],1]]:[[ES[PAR[j]],1],[EU[j],1]];if(Math.random()<.5)p=p.reverse().map(a=>[a[0],0]);K.push({p,i:0,t:0,v:.55+Math.random()*.5})};
+ const ends=(e,f)=>f?[E[e][0],E[e][1]]:[E[e][1],E[e][0]];
+ function draw(ts){
+  if(!w)return;const t=reduce?0:ts/1000,dt=Math.min(.05,Math.max(0,t-last));last=t;
+  if(th!==root.dataset.theme)col();
+  c.clearRect(0,0,w,h);c.font=FONT;c.textBaseline="middle";
+  for(let i=0;i<N.length;i++){const n=N[i];X[i]=n.x+Math.sin(t*n.s+n.p)*n.d;Y[i]=n.y+Math.cos(t*n.s*.9+n.p)*n.d}
+  const H=new Set();if(hov===0)for(let i=1;i<=12;i++)H.add(ES[i]);else if(hov>0){if(hov<=12)H.add(ES[hov]);else{H.add(EU[hov]);H.add(ES[PAR[hov]])}}
+  E.forEach((e,ei)=>{const hl=H.has(ei),ty=e[2];c.globalAlpha=hl?.95:ty===1?.45:ty===2?.3:.12;c.strokeStyle=hl?C.ac:ty===3?C.mut:C.ac2;c.lineWidth=hl?2.2:ty===1?1.5:1;c.beginPath();c.moveTo(X[e[0]],Y[e[0]]);c.lineTo(X[e[1]],Y[e[1]]);c.stroke()});
+  if(!reduce){
+   if(K.length<16&&Math.random()<dt*4)spawn();
+   for(let q=K.length-1;q>=0;q--){const k=K[q];k.t+=dt*k.v;if(k.t>=1){const b=ends(...k.p[k.i])[1];FL[b]=1;k.i++;k.t=0;if(k.i>=k.p.length){K.splice(q,1);continue}}
+    const [a,b]=ends(...k.p[k.i]),x=X[a]+(X[b]-X[a])*k.t,y=Y[a]+(Y[b]-Y[a])*k.t;
+    c.fillStyle=C.ac;c.globalAlpha=.25;c.beginPath();c.arc(x,y,7,0,PI2);c.fill();c.globalAlpha=1;c.beginPath();c.arc(x,y,2.6,0,PI2);c.fill()}
+   for(let i=0;i<39;i++)if(FL[i]>0)FL[i]=Math.max(0,FL[i]-dt*2.2)}
+  for(let i=0;i<N.length;i++){const n=N[i],r=n.r+(i===hov?3:0),st=i===hov?C.tx:i===0||i>8?C.ac:C.ac2;
+   if(FL[i]>0){c.globalAlpha=FL[i]*.55;c.fillStyle=C.ac;c.beginPath();c.arc(X[i],Y[i],r+9*FL[i],0,PI2);c.fill()}
+   if(i===0&&!reduce){const ph=(t*.7)%1;c.globalAlpha=(1-ph)*.55;c.strokeStyle=C.ac;c.lineWidth=2;c.beginPath();c.arc(X[0],Y[0],r+ph*38,0,PI2);c.stroke()}
+   c.globalAlpha=1;c.fillStyle=i===0?C.ac:C.bg;c.strokeStyle=st;c.lineWidth=2;c.beginPath();c.arc(X[i],Y[i],r,0,PI2);c.fill();c.stroke();
+   if(i>0){c.globalAlpha=.4;c.fillStyle=st;c.beginPath();c.arc(X[i],Y[i],r*.5,0,PI2);c.fill();c.globalAlpha=1}}
+  if(labels){for(let i=1;i<=38;i++){const n=N[i],ca=Math.cos(n.a),sa=Math.sin(n.a),g=n.r+6,nm=S[i-1].nama;
+   if(ca>.35)pill(nm,X[i]+g,Y[i],"left",n.lw,i===hov);else if(ca<-.35)pill(nm,X[i]-g,Y[i],"right",n.lw,i===hov);else pill(nm,X[i],Y[i]+(sa>0?g+8:-g-8),"center",n.lw,i===hov)}}
+  c.font="600 12px "+FONT.slice(5);const wl="Wali kelas",wn=WALI.nama;
+  pill(wl,X[0],Y[0]+36,"center",c.measureText(wl).width,hov===0);
+  if(labels){c.font=FONT;pill(wn,X[0],Y[0]+55,"center",c.measureText(wn).width,false)}
+  c.globalAlpha=1;
+  if(hov>=0)showTip()}
+ function showTip(){if(hov<0){tip.hidden=true;return}tip.textContent=hov?`${S[hov-1].nama} · ${S[hov-1].jab}`:`${WALI.nama} · wali kelas`;tip.hidden=false;
+  const tw=tip.offsetWidth,r=N[hov].r;tip.style.left=Math.max(tw/2+4,Math.min(w-tw/2-4,X[hov]))+"px";tip.style.top=(Y[hov]<64?Y[hov]+r+12:Y[hov]-r-34)+"px"}
+ function hit(e){const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;let b=-1,bd=1e9;
+  for(let i=0;i<N.length;i++){const dx=X[i]-x,dy=Y[i]-y,d=dx*dx+dy*dy,m=N[i].r+(e.pointerType==="touch"?14:8);if(d<m*m&&d<bd){bd=d;b=i}}return b}
+ const loop=ts=>{raf=0;draw(ts);if(vis&&!document.hidden&&!reduce)raf=requestAnimationFrame(loop)};
+ const kick=()=>{if(reduce){draw(0);return}if(!raf&&vis&&!document.hidden)raf=requestAnimationFrame(loop)};
+ const setHov=i=>{if(i===hov)return;hov=i;cv.style.cursor=i<0?"":"pointer";if(reduce){draw(0);if(i<0)tip.hidden=true}else if(i<0)tip.hidden=true};
+ cv.addEventListener("pointermove",e=>setHov(hit(e)));
+ cv.addEventListener("pointerleave",()=>setHov(-1));
+ cv.addEventListener("click",e=>{const i=hit(e);if(i<0)return;if(i===0)$("#wBtn").click();else LB.show(S.map(sItem),i-1)});
+ col();lay();kick();
+ if("ResizeObserver"in window){let rw=0;new ResizeObserver(()=>{const n=Math.round(box.getBoundingClientRect().width);if(n===rw)return;rw=n;lay();kick()}).observe(box)}else addEventListener("resize",()=>{lay();kick()});
+ new IntersectionObserver(es=>{vis=es[0].isIntersecting;if(vis)kick()},{rootMargin:"120px"}).observe(box);
+ document.addEventListener("visibilitychange",()=>{if(!document.hidden)kick()});
+ if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{lay();kick()});
+})();
+
+/* dua halaman dalam satu file: #galeri = halaman galeri, selain itu = beranda */
+function route(){const g=location.hash==="#galeri";$("#pgH").hidden=g;$("#pgG").hidden=!g;
+ document.querySelectorAll("nav .links a").forEach(a=>a.classList.toggle("on",g&&a.hash==="#galeri"));
+ if(g){scrollTo(0,0)}else{const t=location.hash.length>1&&document.querySelector(location.hash);t?t.scrollIntoView():scrollTo(0,0)}}
+addEventListener("hashchange",route);route();
+</script>
+</body>
+</html>
